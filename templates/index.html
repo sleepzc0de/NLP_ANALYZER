@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocAnalyzer — NLP Document Intelligence</title>
+
+  <!-- TailwindCSS v4 CDN (Play CDN for browser usage) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- jQuery latest -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+          integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+          crossorigin="anonymous"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --color-brand-50: #f0f9ff;
+      --color-brand-500: #0ea5e9;
+      --color-brand-600: #0284c7;
+      --color-brand-700: #0369a1;
+    }
+
+    .card {
+      @apply bg-white rounded-2xl shadow-sm border border-slate-100 p-6;
+    }
+
+    .btn-primary {
+      @apply px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold
+             transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
+             focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2;
+    }
+
+    .btn-secondary {
+      @apply px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold
+             transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-300;
+    }
+
+    .btn-success {
+      @apply px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold
+             transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400;
+    }
+
+    .btn-warning {
+      @apply px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-white font-semibold
+             transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-300;
+    }
+
+    .btn-danger {
+      @apply px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold
+             transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-400;
+    }
+
+    .badge {
+      @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+
+    .tab-btn {
+      @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150
+             text-slate-500 hover:text-slate-800 hover:bg-slate-100;
+    }
+
+    .tab-btn.active {
+      @apply bg-sky-100 text-sky-700;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans antialiased">
+
+<!-- ─── NAVBAR ─── -->
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
+                   a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </div>
+      <span class="font-bold text-slate-800 text-lg tracking-tight">DocAnalyzer</span>
+    </div>
+    <div class="flex gap-2">
+      <button id="tabUpload" class="tab-btn active" data-target="sectionUpload">Upload & Analyze</button>
+      <button id="tabHistory" class="tab-btn" data-target="sectionHistory">Riwayat Dokumen</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<main class="max-w-7xl mx-auto px-6 py-10 space-y-8">
+
+  <!-- ── TOAST ── -->
+  <div id="toast"
+       class="fixed top-20 right-6 z-50 hidden min-w-72 px-5 py-4 rounded-2xl shadow-xl
+              border text-sm font-medium transition-all">
+  </div>
+
+  <!-- ═══════════ SECTION: UPLOAD ═══════════ -->
+  <section id="sectionUpload">
+
+    <!-- Upload card -->
+    <div class="card">
+      <h2 class="text-xl font-bold text-slate-800 mb-1">Upload Dokumen</h2>
+      <p class="text-sm text-slate-500 mb-6">Unggah file PDF atau DOCX untuk dianalisis menggunakan NLP.</p>
+
+      <div id="dropzone"
+           class="border-2 border-dashed border-slate-300 hover:border-sky-400
+                  rounded-2xl p-10 text-center cursor-pointer transition-colors duration-200
+                  group">
+        <input type="file" id="fileInput" accept=".pdf,.docx,.doc" class="hidden" />
+        <svg class="w-12 h-12 text-slate-300 group-hover:text-sky-400 mx-auto mb-3 transition-colors"
+             fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021
+                   18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+        </svg>
+        <p class="text-slate-500 group-hover:text-slate-700 font-medium">
+          Drag &amp; drop atau <span class="text-sky-500 underline">pilih file</span>
+        </p>
+        <p class="text-xs text-slate-400 mt-1">PDF, DOCX — maks 16 MB</p>
+      </div>
+
+      <div id="filePreview" class="hidden mt-4 flex items-center gap-3 px-4 py-3
+           bg-sky-50 rounded-xl border border-sky-200">
+        <svg class="w-5 h-5 text-sky-500 shrink-0" fill="none" stroke="currentColor"
+             stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586
+                   a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+        </svg>
+        <span id="fileName" class="text-sm text-slate-700 font-medium truncate flex-1"></span>
+        <button id="clearFile" class="text-slate-400 hover:text-rose-500 transition-colors">✕</button>
+      </div>
+
+      <div class="mt-6">
+        <button id="btnAnalyze" class="btn-primary w-full" disabled>
+          <span id="analyzeText">🔍 Analisis Dokumen</span>
+          <span id="analyzeLoading" class="hidden">⏳ Menganalisis...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── RESULT CARD (hidden until analysis) ─── -->
+    <div id="resultCard" class="card hidden">
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Hasil Analisis</h2>
+          <p id="resultFilename" class="text-sm text-slate-500 mt-0.5"></p>
+        </div>
+        <span id="sentimentBadge" class="badge text-sm px-3 py-1"></span>
+      </div>
+
+      <!-- Tabs result -->
+      <div class="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit">
+        <button class="result-tab-btn tab-btn active text-xs" data-rtarget="rtSummary">Ringkasan</button>
+        <button class="result-tab-btn tab-btn text-xs" data-rtarget="rtKeywords">Kata Kunci</button>
+        <button class="result-tab-btn tab-btn text-xs" data-rtarget="rtEntities">Entitas</button>
+        <button class="result-tab-btn tab-btn text-xs" data-rtarget="rtEnriched">Info Lengkap</button>
+        <button class="result-tab-btn tab-btn text-xs" data-rtarget="rtRawText">Teks Asli</button>
+      </div>
+
+      <!-- Summary -->
+      <div id="rtSummary" class="result-tab-content">
+        <div class="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed" id="summaryText"></div>
+      </div>
+
+      <!-- Keywords -->
+      <div id="rtKeywords" class="result-tab-content hidden">
+        <div id="keywordsContainer" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Entities -->
+      <div id="rtEntities" class="result-tab-content hidden">
+        <div id="entitiesContainer" class="space-y-2"></div>
+      </div>
+
+      <!-- Enriched -->
+      <div id="rtEnriched" class="result-tab-content hidden">
+        <pre id="enrichedText" class="bg-slate-50 rounded-xl p-4 text-xs text-slate-700
+             whitespace-pre-wrap leading-relaxed overflow-x-auto"></pre>
+      </div>
+
+      <!-- Raw text -->
+      <div id="rtRawText" class="result-tab-content hidden">
+        <textarea id="rawTextArea"
+                  class="w-full h-64 rounded-xl border border-slate-200 bg-slate-50
+                         p-4 text-xs text-slate-700 resize-y focus:outline-none
+                         focus:ring-2 focus:ring-sky-300"></textarea>
+        <p class="text-xs text-slate-400 mt-1">
+          Anda dapat mengedit teks di sini sebelum generate ulang.
+        </p>
+      </div>
+
+      <!-- ─── ACTION BUTTONS ─── -->
+      <div class="mt-8 pt-6 border-t border-slate-100">
+        <p class="text-sm font-semibold text-slate-600 mb-4">Pilih aksi selanjutnya:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+          <button id="btnSaveOnly" class="btn-success">
+            💾 Simpan ke Database
+          </button>
+
+          <button id="btnRegenerate" class="btn-secondary">
+            🔄 Generate Ulang
+          </button>
+
+          <button id="btnSaveThenRegen" class="btn-warning">
+            💾 + 🔄 Simpan & Generate Ulang
+          </button>
+        </div>
+        <p id="savedDocInfo" class="hidden text-xs text-emerald-600 mt-3 font-medium">
+          ✅ Dokumen tersimpan di database (ID: <span id="savedDocId"></span>)
+        </p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════ SECTION: HISTORY ═══════════ -->
+  <section id="sectionHistory" class="hidden">
+    <div class="card">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-slate-800">Riwayat Dokumen</h2>
+        <button id="btnRefreshHistory" class="btn-secondary text-sm">🔃 Refresh</button>
+      </div>
+
+      <div id="historyLoading" class="text-center py-10 text-slate-400 text-sm hidden">
+        Memuat data...
+      </div>
+
+      <div id="historyEmpty" class="text-center py-10 text-slate-400 text-sm hidden">
+        Belum ada dokumen tersimpan.
+      </div>
+
+      <div id="historyList" class="space-y-3"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── DETAIL MODAL ─── -->
+<div id="detailModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4
+                flex items-center justify-between rounded-t-2xl">
+      <h3 class="font-bold text-slate-800" id="modalTitle">Detail Dokumen</h3>
+      <button id="closeModal" class="text-slate-400 hover:text-slate-700 text-xl">✕</button>
+    </div>
+    <div class="p-6 space-y-4" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ─── SCRIPT ─── -->
+<script src="/static/js/app.js"></script>
+</body>
+</html>
