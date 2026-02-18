@@ -1,282 +1,264 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id" class="scroll-smooth">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DocAnalyzer — NLP Document Intelligence</title>
+  <title>Aset Analyzer - Kementerian Keuangan RI</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-          integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-          crossorigin="anonymous"></script>
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
   <style type="text/tailwindcss">
     .card {
-      @apply bg-white rounded-2xl shadow-sm border border-slate-100 p-6;
-    }
-    .btn-primary {
-      @apply px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold
+        @apply bg-white rounded-2xl shadow-sm border border-slate-100 p-6;
+      }
+      .btn-primary {
+        @apply px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold
              transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
              focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 cursor-pointer;
-    }
-    .btn-secondary {
-      @apply px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold
+      }
+      .btn-secondary {
+        @apply px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold
              transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-300 cursor-pointer;
-    }
-    .btn-success {
-      @apply px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold
+      }
+      .btn-success {
+        @apply px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold
              transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer;
-    }
-    .btn-warning {
-      @apply px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-white font-semibold
+      }
+      .btn-warning {
+        @apply px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-white font-semibold
              transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer;
-    }
-    .btn-danger {
-      @apply px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold
+      }
+      .btn-danger {
+        @apply px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold
              transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-400 cursor-pointer;
-    }
-    .badge {
-      @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    }
-    .tab-btn {
-      @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150
+      }
+      .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+      }
+      .tab-btn {
+        @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150
              text-slate-500 hover:text-slate-800 hover:bg-slate-100 cursor-pointer;
-    }
-    .tab-btn.active {
-      @apply bg-sky-100 text-sky-700;
-    }
-  </style>
+      }
+      .tab-btn.active {
+        @apply bg-sky-100 text-sky-700;
+      }
+    </style>
 </head>
+
 <body class="bg-slate-50 min-h-screen font-sans antialiased">
-
-<!-- NAVBAR -->
-<nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-             stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                   a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-      </div>
-      <span class="font-bold text-slate-800 text-lg tracking-tight">DocAnalyzer</span>
-    </div>
-    <div class="flex gap-2">
-      <button class="tab-btn active" data-target="sectionUpload">
-        Upload &amp; Analyze
-      </button>
-      <button class="tab-btn" data-target="sectionHistory">
-        Riwayat Dokumen
-      </button>
-    </div>
+  <!-- NAVBAR -->
+  <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+     <div class="flex items-center gap-3">
+  <div class="w-9 h-9 flex items-center justify-center">
+    <img src="/static/images/logo.png" alt="Asset Analyzer" class="w-full h-full object-contain">
   </div>
-</nav>
-
-<!-- TOAST -->
-<div id="toast"
-     class="fixed top-20 right-6 z-50 hidden min-w-72 px-5 py-4
-            rounded-2xl shadow-xl border text-sm font-medium">
+  <span class="font-bold text-slate-800 text-lg tracking-tight">
+    Asset Analyzer - Biro Manajemen BMN dan Pengadaan
+  </span>
 </div>
+      <div class="flex gap-2">
+        <button class="tab-btn active" data-target="sectionUpload">
+          Upload &amp; Analisis
+        </button>
+        <button class="tab-btn" data-target="sectionHistory">
+          Riwayat Dokumen
+        </button>
+      </div>
+    </div>
+  </nav>
 
-<main class="max-w-7xl mx-auto px-6 py-10 space-y-8">
+  <!-- TOAST -->
+  <div id="toast"
+    class="fixed top-20 right-6 z-50 hidden min-w-72 px-5 py-4 rounded-2xl shadow-xl border text-sm font-medium"></div>
 
-  <!-- ═══ SECTION UPLOAD ═══ -->
-  <section id="sectionUpload">
-
-    <!-- Upload Card -->
-    <div class="card">
-      <h2 class="text-xl font-bold text-slate-800 mb-1">Upload Dokumen</h2>
-      <p class="text-sm text-slate-500 mb-6">
-        Unggah file PDF atau DOCX untuk dianalisis menggunakan NLP.
-      </p>
-
-      <!-- INPUT FILE — di luar dropzone, tidak hidden dengan display:none -->
-      <input
-        type="file"
-        id="fileInput"
-        name="file"
-        accept=".pdf,.docx,.doc"
-        style="position:absolute; left:-9999px; top:-9999px; opacity:0; width:1px; height:1px;"
-      />
-
-      <!-- DROPZONE -->
-      <div id="dropzone"
-           class="border-2 border-dashed border-slate-300 hover:border-sky-400
-                  rounded-2xl p-10 text-center transition-colors duration-200 group"
-           style="cursor:pointer;">
-        <svg class="w-12 h-12 text-slate-300 group-hover:text-sky-400 mx-auto mb-3 transition-colors"
-             fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021
-                   18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-        </svg>
-        <p class="text-slate-500 group-hover:text-slate-700 font-medium">
-          Drag &amp; drop atau
-          <span class="text-sky-500 underline font-semibold">klik untuk pilih file</span>
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-8">
+    <!-- ═══ SECTION UPLOAD ═══ -->
+    <section id="sectionUpload">
+      <!-- Upload Card -->
+      <div class="card">
+        <h2 class="text-xl font-bold text-slate-800 mb-1">Upload Dokumen</h2>
+        <p class="text-sm text-slate-500 mb-6">
+          Unggah file PDF atau DOCX untuk dianalisis menggunakan NLP.
         </p>
-        <p class="text-xs text-slate-400 mt-1">PDF, DOCX — maks 16 MB</p>
+
+        <!-- INPUT FILE — di luar dropzone, tidak hidden dengan display:none -->
+        <input type="file" id="fileInput" name="file" accept=".pdf,.docx,.doc" style="
+              position: absolute;
+              left: -9999px;
+              top: -9999px;
+              opacity: 0;
+              width: 1px;
+              height: 1px;
+            " />
+
+        <!-- DROPZONE -->
+        <div id="dropzone"
+          class="border-2 border-dashed border-slate-300 hover:border-sky-400 rounded-2xl p-10 text-center transition-colors duration-200 group"
+          style="cursor: pointer">
+          <svg class="w-12 h-12 text-slate-300 group-hover:text-sky-400 mx-auto mb-3 transition-colors" fill="none"
+            stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021
+                   18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+          <p class="text-slate-500 group-hover:text-slate-700 font-medium">
+            Drag &amp; drop atau
+            <span class="text-sky-500 underline font-semibold">klik untuk pilih file</span>
+          </p>
+          <p class="text-xs text-slate-400 mt-1">PDF, DOCX — maks 16 MB</p>
+        </div>
+
+        <!-- TOMBOL PILIH FILE — alternatif eksplisit -->
+        <div class="mt-3 flex justify-center">
+          <label for="fileInput"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium cursor-pointer transition-all">
+            📁 Atau klik di sini untuk pilih file
+          </label>
+        </div>
+
+        <!-- FILE PREVIEW -->
+        <div id="filePreview"
+          class="hidden mt-4 flex items-center gap-3 px-4 py-3 bg-sky-50 rounded-xl border border-sky-200">
+          <svg class="w-5 h-5 text-sky-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586
+                   a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+          </svg>
+          <span id="fileName" class="text-sm text-slate-700 font-medium truncate flex-1">
+          </span>
+          <button id="clearFile" type="button"
+            class="text-slate-400 hover:text-rose-500 transition-colors text-lg leading-none font-bold px-1">
+            ✕
+          </button>
+        </div>
+
+        <!-- TOMBOL ANALISIS -->
+        <div class="mt-6">
+          <button id="btnAnalyze" type="button" class="btn-primary w-full" disabled>
+            <span id="analyzeText">🔍 Analisis Dokumen</span>
+            <span id="analyzeLoading" class="hidden">⏳ Menganalisis...</span>
+          </button>
+        </div>
       </div>
 
-      <!-- TOMBOL PILIH FILE — alternatif eksplisit -->
-      <div class="mt-3 flex justify-center">
-        <label for="fileInput"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
-                      bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm
-                      font-medium cursor-pointer transition-all">
-          📁 Atau klik di sini untuk pilih file
-        </label>
-      </div>
+      <!-- ═══ RESULT CARD ═══ -->
+      <div id="resultCard" class="card hidden mt-8">
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Hasil Analisis</h2>
+            <p id="resultFilename" class="text-sm text-slate-500 mt-0.5"></p>
+          </div>
+          <span id="sentimentBadge" class="badge text-sm px-3 py-1"></span>
+        </div>
 
-      <!-- FILE PREVIEW -->
-      <div id="filePreview"
-           class="hidden mt-4 flex items-center gap-3 px-4 py-3
-                  bg-sky-50 rounded-xl border border-sky-200">
-        <svg class="w-5 h-5 text-sky-500 shrink-0" fill="none"
-             stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586
-                   a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-        </svg>
-        <span id="fileName"
-              class="text-sm text-slate-700 font-medium truncate flex-1">
-        </span>
-        <button id="clearFile" type="button"
-                class="text-slate-400 hover:text-rose-500 transition-colors
-                       text-lg leading-none font-bold px-1">
+        <!-- Result Tabs -->
+        <div class="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit flex-wrap">
+          <button type="button" class="result-tab-btn tab-btn active text-xs" data-rtarget="rtSummary">
+            Ringkasan
+          </button>
+          <button type="button" class="result-tab-btn tab-btn text-xs" data-rtarget="rtKeywords">
+            Kata Kunci
+          </button>
+          <button type="button" class="result-tab-btn tab-btn text-xs" data-rtarget="rtEntities">
+            Entitas
+          </button>
+          <button type="button" class="result-tab-btn tab-btn text-xs" data-rtarget="rtEnriched">
+            Info Lengkap
+          </button>
+          <button type="button" class="result-tab-btn tab-btn text-xs" data-rtarget="rtRawText">
+            Teks Asli
+          </button>
+        </div>
+
+        <div id="rtSummary" class="result-tab-content">
+          <div id="summaryText" class="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed"></div>
+        </div>
+
+        <div id="rtKeywords" class="result-tab-content hidden">
+          <div id="keywordsContainer" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div id="rtEntities" class="result-tab-content hidden">
+          <div id="entitiesContainer" class="space-y-2"></div>
+        </div>
+
+        <div id="rtEnriched" class="result-tab-content hidden">
+          <pre id="enrichedText"
+            class="bg-slate-50 rounded-xl p-4 text-xs text-slate-700 whitespace-pre-wrap leading-relaxed overflow-x-auto"></pre>
+        </div>
+
+        <div id="rtRawText" class="result-tab-content hidden">
+          <textarea id="rawTextArea"
+            class="w-full h-64 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700 resize-y focus:outline-none focus:ring-2 focus:ring-sky-300">
+            </textarea>
+          <p class="text-xs text-slate-400 mt-1">
+            Edit teks sebelum generate ulang untuk menambah informasi.
+          </p>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="mt-8 pt-6 border-t border-slate-100">
+          <p class="text-sm font-semibold text-slate-600 mb-4">
+            Pilih aksi selanjutnya:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button id="btnSaveOnly" type="button" class="btn-success">
+              Simpan ke Database
+            </button>
+            <button id="btnRegenerate" type="button" class="btn-secondary">
+              Generate Ulang
+            </button>
+            <button id="btnSaveThenRegen" type="button" class="btn-warning">
+              Simpan &amp; Generate Ulang
+            </button>
+          </div>
+          <p id="savedDocInfo" class="hidden text-xs text-emerald-600 mt-3 font-medium">
+            ✅ Dokumen tersimpan (ID: <span id="savedDocId"></span>)
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SECTION HISTORY ═══ -->
+    <section id="sectionHistory" class="hidden">
+      <div class="card">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-slate-800">Riwayat Dokumen</h2>
+          <button id="btnRefreshHistory" type="button" class="btn-secondary text-sm">
+            🔃 Refresh
+          </button>
+        </div>
+        <div id="historyLoading" class="text-center py-10 text-slate-400 text-sm hidden">
+          ⏳ Memuat data...
+        </div>
+        <div id="historyEmpty" class="text-center py-10 text-slate-400 text-sm hidden">
+          Belum ada dokumen tersimpan.
+        </div>
+        <div id="historyList" class="space-y-3"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- DETAIL MODAL -->
+  <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div
+        class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <h3 id="modalTitle" class="font-bold text-slate-800">
+          Detail Dokumen
+        </h3>
+        <button id="closeModal" type="button" class="text-slate-400 hover:text-slate-700 text-xl font-bold">
           ✕
         </button>
       </div>
-
-      <!-- TOMBOL ANALISIS -->
-      <div class="mt-6">
-        <button id="btnAnalyze" type="button" class="btn-primary w-full" disabled>
-          <span id="analyzeText">🔍 Analisis Dokumen</span>
-          <span id="analyzeLoading" class="hidden">⏳ Menganalisis...</span>
-        </button>
-      </div>
+      <div id="modalBody" class="p-6 space-y-4"></div>
     </div>
-
-    <!-- ═══ RESULT CARD ═══ -->
-    <div id="resultCard" class="card hidden mt-8">
-      <div class="flex items-start justify-between mb-6">
-        <div>
-          <h2 class="text-xl font-bold text-slate-800">Hasil Analisis</h2>
-          <p id="resultFilename" class="text-sm text-slate-500 mt-0.5"></p>
-        </div>
-        <span id="sentimentBadge" class="badge text-sm px-3 py-1"></span>
-      </div>
-
-      <!-- Result Tabs -->
-      <div class="flex gap-1 mb-6 bg-slate-100 p-1 rounded-xl w-fit flex-wrap">
-        <button type="button" class="result-tab-btn tab-btn active text-xs"
-                data-rtarget="rtSummary">Ringkasan</button>
-        <button type="button" class="result-tab-btn tab-btn text-xs"
-                data-rtarget="rtKeywords">Kata Kunci</button>
-        <button type="button" class="result-tab-btn tab-btn text-xs"
-                data-rtarget="rtEntities">Entitas</button>
-        <button type="button" class="result-tab-btn tab-btn text-xs"
-                data-rtarget="rtEnriched">Info Lengkap</button>
-        <button type="button" class="result-tab-btn tab-btn text-xs"
-                data-rtarget="rtRawText">Teks Asli</button>
-      </div>
-
-      <div id="rtSummary" class="result-tab-content">
-        <div id="summaryText"
-             class="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
-        </div>
-      </div>
-
-      <div id="rtKeywords" class="result-tab-content hidden">
-        <div id="keywordsContainer" class="flex flex-wrap gap-2"></div>
-      </div>
-
-      <div id="rtEntities" class="result-tab-content hidden">
-        <div id="entitiesContainer" class="space-y-2"></div>
-      </div>
-
-      <div id="rtEnriched" class="result-tab-content hidden">
-        <pre id="enrichedText"
-             class="bg-slate-50 rounded-xl p-4 text-xs text-slate-700
-                    whitespace-pre-wrap leading-relaxed overflow-x-auto">
-        </pre>
-      </div>
-
-      <div id="rtRawText" class="result-tab-content hidden">
-        <textarea id="rawTextArea"
-                  class="w-full h-64 rounded-xl border border-slate-200 bg-slate-50
-                         p-4 text-xs text-slate-700 resize-y focus:outline-none
-                         focus:ring-2 focus:ring-sky-300">
-        </textarea>
-        <p class="text-xs text-slate-400 mt-1">
-          Edit teks sebelum generate ulang untuk menambah informasi.
-        </p>
-      </div>
-
-      <!-- ACTION BUTTONS -->
-      <div class="mt-8 pt-6 border-t border-slate-100">
-        <p class="text-sm font-semibold text-slate-600 mb-4">Pilih aksi selanjutnya:</p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button id="btnSaveOnly" type="button" class="btn-success">
-            💾 Simpan ke Database
-          </button>
-          <button id="btnRegenerate" type="button" class="btn-secondary">
-            🔄 Generate Ulang
-          </button>
-          <button id="btnSaveThenRegen" type="button" class="btn-warning">
-            💾 + 🔄 Simpan &amp; Generate Ulang
-          </button>
-        </div>
-        <p id="savedDocInfo" class="hidden text-xs text-emerald-600 mt-3 font-medium">
-          ✅ Dokumen tersimpan (ID: <span id="savedDocId"></span>)
-        </p>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ═══ SECTION HISTORY ═══ -->
-  <section id="sectionHistory" class="hidden">
-    <div class="card">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-slate-800">Riwayat Dokumen</h2>
-        <button id="btnRefreshHistory" type="button" class="btn-secondary text-sm">
-          🔃 Refresh
-        </button>
-      </div>
-      <div id="historyLoading"
-           class="text-center py-10 text-slate-400 text-sm hidden">
-        ⏳ Memuat data...
-      </div>
-      <div id="historyEmpty"
-           class="text-center py-10 text-slate-400 text-sm hidden">
-        Belum ada dokumen tersimpan.
-      </div>
-      <div id="historyList" class="space-y-3"></div>
-    </div>
-  </section>
-
-</main>
-
-<!-- DETAIL MODAL -->
-<div id="detailModal"
-     class="fixed inset-0 z-50 hidden items-center justify-center
-            bg-black/40 backdrop-blur-sm p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl
-              max-h-[90vh] overflow-y-auto">
-    <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4
-                flex items-center justify-between rounded-t-2xl">
-      <h3 id="modalTitle" class="font-bold text-slate-800">Detail Dokumen</h3>
-      <button id="closeModal" type="button"
-              class="text-slate-400 hover:text-slate-700 text-xl font-bold">
-        ✕
-      </button>
-    </div>
-    <div id="modalBody" class="p-6 space-y-4"></div>
   </div>
-</div>
 
-<script src="/static/js/app.js"></script>
+  <script src="/static/js/app.js"></script>
 </body>
+
 </html>
