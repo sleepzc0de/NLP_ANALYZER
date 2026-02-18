@@ -8,6 +8,8 @@ from models import db
 from models.document import Document
 from services.file_processor import FileProcessor
 from services.nlp_analyzer import NLPAnalyzer
+from services.nota_dinas_extractor import NotaDinasExtractor
+from services.balasan_generator import BalasanGenerator
 
 doc_bp = Blueprint("documents", __name__, url_prefix="/api")
 
@@ -227,3 +229,68 @@ def health_check():
         "upload_folder": current_app.config["UPLOAD_FOLDER"],
         "allowed_extensions": list(current_app.config["ALLOWED_EXTENSIONS"]),
     }), 200
+
+@doc_bp.route("/extract-nota-dinas", methods=["POST"])
+def extract_nota_dinas():
+    """Ekstrak data terstruktur dari teks Nota Dinas."""
+    try:
+        data = request.get_json(force=True)
+        if not data or "text" not in data:
+            return jsonify({"error": "text wajib diisi"}), 400
+
+        text = data["text"]
+        nd   = NotaDinasExtractor.extract(text)
+        nd_dict = NotaDinasExtractor.to_dict(nd)
+
+        return jsonify({
+            "status":    "success",
+            "nota_dinas": nd_dict,
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@doc_bp.route("/generate-balasan", methods=["POST"])
+def generate_balasan():
+    """Generate konsep balasan Nota Dinas."""
+    try:
+        data = request.get_json(force=True)
+        if not data:
+            return jsonify({"error": "Data tidak boleh kosong"}), 400
+
+        text           = data.get("text", "")
+        unit_pembalas  = data.get("unit_pembalas", "")
+        nama_ttd       = data.get("nama_ttd", "")
+        jabatan_ttd    = data.get("jabatan_ttd", "")
+        nd_data        = data.get("nota_dinas_data", None)
+
+        # Gunakan data yang sudah diekstrak jika ada,
+        # atau ekstrak ulang dari teks
+        if nd_data:
+            from services.nota_dinas_extractor import NotaDinas
+            nd = NotaDinas(**{
+                k: v for k, v in nd_data.items()
+                if k in NotaDinas.__dataclass_fields__
+            })
+        elif text:
+            nd = NotaDinasExtractor.extract(text)
+        else:
+            return jsonify({"error": "Sediakan text atau nota_dinas_data"}), 400
+
+        result = BalasanGenerator.generate(
+            nd,
+            unit_pembalas=unit_pembalas,
+            nama_ttd=nama_ttd,
+            jabatan_ttd=jabatan_ttd,
+        )
+
+        return jsonify({
+            "status":  "success",
+            "balasan": result,
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500

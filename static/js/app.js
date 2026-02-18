@@ -137,6 +137,290 @@ $(function () {
   });
 
   /* ════════════════════════════════════════
+     NOTA DINAS — File Handling
+  ════════════════════════════════════════ */
+  let selectedFileND  = null;
+  let currentNDData   = null;
+
+  const $dropzoneND  = $("#dropzoneND");
+  const $fileInputND = $("#fileInputND");
+
+  $dropzoneND.on("click", function (e) {
+    if ($(e.target).closest("#clearFileND").length) return;
+    $fileInputND.trigger("click");
+  });
+
+  $fileInputND.on("change", function () {
+    if (this.files && this.files.length > 0) handleFileND(this.files[0]);
+  });
+
+  $dropzoneND.on("dragover dragenter", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    $(this).addClass("border-violet-400 bg-violet-50");
+  });
+  $dropzoneND.on("dragleave dragend", function (e) {
+    e.preventDefault();
+    $(this).removeClass("border-violet-400 bg-violet-50");
+  });
+  $dropzoneND.on("drop", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    $(this).removeClass("border-violet-400 bg-violet-50");
+    const files = e.originalEvent.dataTransfer.files;
+    if (files && files.length > 0) handleFileND(files[0]);
+  });
+
+  function handleFileND(file) {
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (!["pdf", "docx", "doc"].includes(ext)) {
+      showToast("Format tidak didukung. Gunakan PDF atau DOCX.", "error");
+      return;
+    }
+    selectedFileND = file;
+    const sizeKB = (file.size / 1024).toFixed(1);
+    $("#fileNameND").text(`${file.name} (${sizeKB} KB)`);
+    $("#filePreviewND").removeClass("hidden");
+    $("#btnExtractND").prop("disabled", false);
+    $("#ndResultCard").addClass("hidden");
+    currentNDData = null;
+  }
+
+  $("#clearFileND").on("click", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    selectedFileND = null;
+    $fileInputND.val("");
+    $("#filePreviewND").addClass("hidden");
+    $("#btnExtractND").prop("disabled", true);
+    $("#ndResultCard").addClass("hidden");
+  });
+
+  /* ════ EXTRACT NOTA DINAS ════ */
+  $("#btnExtractND").on("click", function () {
+    if (!selectedFileND) {
+      showToast("Pilih file Nota Dinas terlebih dahulu.", "warning");
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("file", selectedFileND, selectedFileND.name);
+
+    $("#btnExtractND").prop("disabled", true);
+    $("#extractNDText").addClass("hidden");
+    $("#extractNDLoading").removeClass("hidden");
+
+    // Step 1: Upload & ekstrak teks
+    $.ajax({
+      url: "/api/upload",
+      method: "POST",
+      data: fd,
+      processData: false,
+      contentType: false,
+      timeout: 120000,
+      success: function (res) {
+        // Step 2: Ekstrak struktur Nota Dinas
+        $.ajax({
+          url: "/api/extract-nota-dinas",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ text: res.full_text }),
+          success: function (ndRes) {
+            currentNDData = {
+              nota_dinas: ndRes.nota_dinas,
+              full_text:  res.full_text,
+            };
+            renderNotaDinas(ndRes.nota_dinas);
+            showToast("✅ Nota Dinas berhasil dianalisis!", "success");
+          },
+          error: function (xhr) {
+            showToast(xhr.responseJSON?.error || "Gagal mengekstrak struktur.", "error");
+          }
+        });
+      },
+      error: function (xhr) {
+        const msg = xhr.responseJSON?.error || "Gagal memproses file.";
+        showToast(msg, "error");
+      },
+      complete: function () {
+        $("#btnExtractND").prop("disabled", false);
+        $("#extractNDText").removeClass("hidden");
+        $("#extractNDLoading").addClass("hidden");
+      }
+    });
+  });
+
+  /* ════ RENDER NOTA DINAS ════ */
+  function renderNotaDinas(nd) {
+    // Header info
+    $("#ndJenis").text(nd.jenis_dokumen || "Nota Dinas");
+    $("#ndNomor").text(nd.nomor || "Nomor tidak terdeteksi");
+    $("#ndHal").text(nd.hal || "—");
+    $("#ndSifat").text(nd.sifat || "Biasa");
+    $("#ndDari").text(nd.dari || "—");
+    $("#ndTanggal").text(nd.tanggal || "—");
+    $("#ndTTD").text(nd.penandatangan || "—");
+    $("#ndDeadline").text(
+      nd.deadline?.length ? nd.deadline.join(", ") : "Tidak ada batas waktu"
+    );
+
+    // Kepada
+    const kepadaHtml = (nd.kepada || []).length
+      ? nd.kepada.map((k, i) =>
+          `<div class="flex gap-3 items-start px-4 py-2.5 bg-slate-50 rounded-xl">
+             <span class="badge bg-violet-100 text-violet-700 shrink-0 mt-0.5">${i+1}</span>
+             <span class="text-sm text-slate-700">${k}</span>
+           </div>`
+        ).join("")
+      : "<p class='text-slate-400 text-sm'>Tidak terdeteksi</p>";
+    $("#ndKepadaList").html(kepadaHtml);
+
+    // Isi Pokok
+    const isiHtml = (nd.isi_pokok || []).length
+      ? nd.isi_pokok.map((p, i) =>
+          `<div class="px-4 py-3 bg-slate-50 rounded-xl border-l-3 border-violet-300">
+             <p class="text-sm text-slate-700 leading-relaxed">${p}</p>
+           </div>`
+        ).join("")
+      : "<p class='text-slate-400 text-sm'>Tidak terdeteksi</p>";
+    $("#ndIsiList").html(isiHtml);
+
+    // Poin Aksi
+    const poinHtml = (nd.poin_penting || []).length
+      ? nd.poin_penting.map(p =>
+          `<div class="flex gap-3 items-start px-4 py-2.5 bg-amber-50 rounded-xl border border-amber-100">
+             <span class="text-amber-500 shrink-0">⚡</span>
+             <span class="text-sm text-slate-700">${p}</span>
+           </div>`
+        ).join("")
+      : "<p class='text-slate-400 text-sm'>Tidak ada poin aksi terdeteksi</p>";
+    $("#ndPoinList").html(poinHtml);
+
+    // Regulasi
+    const regHtml = (nd.referensi_regulasi || []).length
+      ? nd.referensi_regulasi.map(r =>
+          `<div class="flex gap-3 items-start px-4 py-2.5 bg-blue-50 rounded-xl">
+             <span class="text-blue-500 shrink-0">📜</span>
+             <span class="text-xs text-slate-600">${r}</span>
+           </div>`
+        ).join("")
+      : "<p class='text-slate-400 text-sm'>Tidak ada referensi regulasi</p>";
+    $("#ndRegulasiList").html(regHtml);
+
+    // Tembusan
+    const tembusanHtml = (nd.tembusan || []).length
+      ? nd.tembusan.map(t =>
+          `<div class="flex gap-3 items-center px-4 py-2 bg-slate-50 rounded-xl">
+             <span class="text-slate-400">→</span>
+             <span class="text-sm text-slate-600">${t}</span>
+           </div>`
+        ).join("")
+      : "<p class='text-slate-400 text-sm'>Tidak ada tembusan</p>";
+    $("#ndTembusanList").html(tembusanHtml);
+
+    // Tampilkan section hasil
+    $(".nd-tab-btn").first().trigger("click");
+    $("#ndResultCard").removeClass("hidden");
+    $("html, body").animate({ scrollTop: $("#ndResultCard").offset().top - 80 }, 400);
+  }
+
+  /* ════ ND INNER TABS ════ */
+  $(document).on("click", ".nd-tab-btn", function () {
+    $(".nd-tab-btn").removeClass("active");
+    $(this).addClass("active");
+    $(".nd-tab-content").addClass("hidden");
+    $(`#${$(this).data("ndtarget")}`).removeClass("hidden");
+  });
+
+  /* ════ BALASAN TABS ════ */
+  $(document).on("click", ".balasan-tab-btn", function () {
+    $(".balasan-tab-btn").removeClass("active");
+    $(this).addClass("active");
+    $(".balasan-tab-content").addClass("hidden");
+    $(`#${$(this).data("btarget")}`).removeClass("hidden");
+  });
+
+  /* ════ GENERATE BALASAN ════ */
+  $("#btnGenerateBalasan").on("click", function () {
+    if (!currentNDData) {
+      showToast("Upload Nota Dinas terlebih dahulu.", "warning");
+      return;
+    }
+
+    const unit     = $("#inputUnitPembalas").val().trim();
+    const nama     = $("#inputNamaTTD").val().trim();
+    const jabatan  = $("#inputJabatanTTD").val().trim();
+
+    $("#btnGenerateBalasan").prop("disabled", true);
+    $("#balasanText").addClass("hidden");
+    $("#balasanLoading").removeClass("hidden");
+
+    $.ajax({
+      url: "/api/generate-balasan",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        nota_dinas_data: currentNDData.nota_dinas,
+        text:            currentNDData.full_text,
+        unit_pembalas:   unit,
+        nama_ttd:        nama,
+        jabatan_ttd:     jabatan,
+      }),
+      success: function (res) {
+        renderBalasan(res.balasan);
+        showToast("✅ Konsep balasan berhasil dibuat!", "success");
+      },
+      error: function (xhr) {
+        showToast(xhr.responseJSON?.error || "Gagal generate balasan.", "error");
+      },
+      complete: function () {
+        $("#btnGenerateBalasan").prop("disabled", false);
+        $("#balasanText").removeClass("hidden");
+        $("#balasanLoading").addClass("hidden");
+      }
+    });
+  });
+
+  /* ════ RENDER BALASAN ════ */
+  function renderBalasan(balasan) {
+    $("#balasanFormal").val(balasan.konsep_formal || "");
+    $("#balasanSingkat").val(balasan.konsep_singkat || "");
+
+    // Checklist
+    const cl = balasan.checklist_aksi || [];
+    const clHtml = cl.map(item => {
+      const color = item.prioritas === "Tinggi"
+        ? "bg-rose-50 border-rose-200 text-rose-600"
+        : "bg-slate-50 border-slate-200 text-slate-500";
+      return `
+        <div class="flex items-center gap-3 px-4 py-3 rounded-xl border ${color}">
+          <input type="checkbox" class="w-4 h-4 rounded accent-emerald-500" />
+          <span class="text-sm flex-1">${item.item}</span>
+          <span class="badge text-xs ${
+            item.prioritas === "Tinggi"
+              ? "bg-rose-100 text-rose-600"
+              : "bg-slate-100 text-slate-500"
+          }">${item.prioritas}</span>
+        </div>`;
+    }).join("");
+    $("#checklistContainer").html(clHtml);
+
+    $(".balasan-tab-btn").first().trigger("click");
+    $("#balasanResultCard").removeClass("hidden");
+    $("html, body").animate(
+      { scrollTop: $("#balasanResultCard").offset().top - 80 }, 400
+    );
+  }
+
+  /* ════ COPY BALASAN ════ */
+  $("#btnCopyBalasan").on("click", function () {
+    const activeTab = $(".balasan-tab-content:not(.hidden)");
+    const textarea  = activeTab.find("textarea");
+    if (textarea.length) {
+      navigator.clipboard.writeText(textarea.val())
+        .then(() => showToast("✅ Teks berhasil disalin!", "success"))
+        .catch(() => showToast("Gagal menyalin.", "error"));
+    }
+  });
+
+  /* ════════════════════════════════════════
      ANALYZE — pakai selectedFile langsung
   ════════════════════════════════════════ */
   $("#btnAnalyze").on("click", function () {
